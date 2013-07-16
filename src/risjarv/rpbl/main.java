@@ -1,3 +1,15 @@
+/*****************************************************************
+ *  
+ * main
+ * 
+ * @version 1.0
+ * 
+ * @author Risjarv
+ *  
+ * Copyright (c) 2013 - 2013, Risjarv, All rights reserved.
+ * 
+ ****************************************************************/
+
 package risjarv.rpbl;
 
 import java.util.HashMap;
@@ -23,25 +35,45 @@ import risjarv.rpbl.listeners.HeroChatListener;
 import risjarv.rpbl.util.network;
 
 /**
- *
- * @author risjarv
+ * The main class of this plugin.
+ * 
+ * Contains additional methods, for example chat parsing.
  */
 public class main extends JavaPlugin implements Listener {
 
+    /** The ban command. */
     public List<String> banCommand;
+    
+    /** The automatic info. */
     public boolean automaticInfo;
+    
+    /** The automatic info_to console. */
     public boolean automaticInfo_toConsole;
+    
+    /** The auth key. */
     public String authKey = "";
 
+    /** The c server. */
     public String cServer = "";
 
-    private HashMap<String,Integer> State;
+    /** The State. */
+    private HashMap<String,Integer> State = new HashMap<String, Integer>();
+    
+    /** The Queue. */
+    public HashMap<String, String> Queue = new HashMap<String, String>();
+    
+    /** The chat listener. */
     private ChatListener chatListener;
+    
+    /** The hero chat listener. */
     private HeroChatListener heroChatListener;
+    
+    /** The exec. */
     private Command exec;
 
-    public HashMap<String,String> Queue;
-
+    /* (non-Javadoc)
+     * @see org.bukkit.plugin.java.JavaPlugin#onEnable()
+     */
     @Override
     public void onEnable() {
 
@@ -49,9 +81,6 @@ public class main extends JavaPlugin implements Listener {
         this.banCommand = this.getConfig().getStringList("ban_commands");
         this.automaticInfo = this.getConfig().getBoolean("automatic_info");
         this.automaticInfo_toConsole = this.getConfig().getBoolean("log_to_console");
-
-        Queue = new HashMap<>();
-        State = new HashMap<>();
 
         getServer().getPluginManager().registerEvents(this,this);
 
@@ -79,6 +108,11 @@ public class main extends JavaPlugin implements Listener {
 
     }
 
+    /**
+     * An event that is fired before command is handled
+     *
+     * @param event, the fired PlayerCommandPreProcessEvent instance
+     */
     @EventHandler(ignoreCancelled = true,priority = EventPriority.MONITOR)
     public void onPreCommand(PlayerCommandPreprocessEvent event) {
 
@@ -124,6 +158,11 @@ public class main extends JavaPlugin implements Listener {
      * Probably should ask nickname, instead of 'konsoli'.
      * Not fully done.
      */
+    /**
+     * An Event which is fired when console inputs a command
+     *
+     * @param event, the fired ServerCommandEvent
+     */
     @EventHandler(ignoreCancelled = true,priority = EventPriority.MONITOR)
     public void onServerCommand(ServerCommandEvent event) {
         String console = event.getSender().getName();
@@ -166,6 +205,11 @@ public class main extends JavaPlugin implements Listener {
     /*
      * Not firing in craftbukkit, when offline mode is enabled.
      */
+    /**
+     * An event, which is fired when a player attempts to join the server
+     *
+     * @param event, the fired AsyncPlayerPreLoginEvent
+     */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onAsyncPlayerPreLoginEvent(AsyncPlayerPreLoginEvent event) {
 
@@ -174,7 +218,7 @@ public class main extends JavaPlugin implements Listener {
 
         if( b == 0L && automaticInfo == true ) {
 
-            Map<String,String> map = new ConcurrentHashMap<>();
+            Map<String,String> map = new ConcurrentHashMap<String, String>();
             map.put("player", event.getName());
             String text = network.sendData("http://localhost/search.php",map);
 
@@ -191,6 +235,15 @@ public class main extends JavaPlugin implements Listener {
         }
     }
 
+    /**
+     * Method for handling chat when player is asked for
+     * more information, for example a ban reason.
+     * 
+     * It will parse the chat message.
+     *
+     * @param player, the player whose chat is to be parsed
+     * @param message, the chat message player sent
+     */
     public void rpbl_handleChat(Player player, String message) {
         String name = player.getName();
         String msg = Queue.get(name);
